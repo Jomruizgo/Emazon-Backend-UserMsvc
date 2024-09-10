@@ -1,49 +1,57 @@
 package com.emazon.msvc_user.domain.api.usecase;
 
+import com.emazon.msvc_user.domain.exceptions.DuplicatedObjectException;
 import com.emazon.msvc_user.domain.model.User;
 import com.emazon.msvc_user.domain.spi.IRolePersistencePort;
+import com.emazon.msvc_user.domain.spi.IUserPersistencePort;
+import com.emazon.msvc_user.domain.util.ValidationMessages;
 
 import java.util.Calendar;
 import java.util.Date;
 
+import static org.springframework.util.ClassUtils.isPresent;
+
 public class ValidateUser {
     private final IRolePersistencePort rolePersistencePort;
+    private final IUserPersistencePort userPersistencePort;
 
-    public ValidateUser(IRolePersistencePort rolePersistencePort) {
+    public ValidateUser(IRolePersistencePort rolePersistencePort, IUserPersistencePort userPersistencePort) {
         this.rolePersistencePort = rolePersistencePort;
+        this.userPersistencePort = userPersistencePort;
     }
 
     public void validateUserData(User user) {
-        // Validate name and lastName
         if (isBlank(user.getName())) {
-            throw new IllegalArgumentException("Name is mandatory");
+            throw new IllegalArgumentException(ValidationMessages.NAME_MANDATORY);
         }
         if (isBlank(user.getLastName())) {
-            throw new IllegalArgumentException("Last name is mandatory");
+            throw new IllegalArgumentException(ValidationMessages.LAST_NAME_MANDATORY);
         }
 
-        // Validate document ID (only numeric)
-        if (user.getDocumentId() == null || !String.valueOf(user.getDocumentId()).matches("\\d+")) {
-            throw new IllegalArgumentException("Document must be numeric");
+        if (user.getDocumentId() == null) {
+            throw new IllegalArgumentException(ValidationMessages.DOCUMENT_MANDATORY);
+        }
+        if(userPersistencePort.findUserByDocumentId(user.getDocumentId()) != null) {
+            throw new DuplicatedObjectException(ValidationMessages.DUPLICATE_DOCUMENT);
         }
 
-        // Validate mobile number (up to 13 characters, may start with +)
         if (user.getMobileNumber() == null || !user.getMobileNumber().matches("^\\+?\\d{1,13}$")) {
-            throw new IllegalArgumentException("Mobile number must be up to 13 characters: 12 digits and additionally can start with '+'");
+            throw new IllegalArgumentException(ValidationMessages.MOBILE_NUMBER_INVALID);
         }
 
-        // Validate email structure
         if (!isValidEmail(user.getEmail())) {
-            throw new IllegalArgumentException("Email should be valid");
+            throw new IllegalArgumentException(ValidationMessages.EMAIL_INVALID);
+        }
+        if (userPersistencePort.findUserByEmail(user.getEmail()) != null){
+            throw new DuplicatedObjectException(ValidationMessages.DUPLICATE_EMAIL);
         }
 
-        // Validate birthdate (user must be at least 18 years old)
         if (!isAdult(user.getBirthdate())) {
-            throw new IllegalArgumentException("User must be an adult (18+ years)");
+            throw new IllegalArgumentException(ValidationMessages.USER_NOT_ADULT);
         }
 
         if (rolePersistencePort.findRoleByName(user.getRole().getName()) == null){
-            throw new IllegalArgumentException("Role must be valid.");
+            throw new IllegalArgumentException(ValidationMessages.ROLE_INVALID);
         }
     }
 

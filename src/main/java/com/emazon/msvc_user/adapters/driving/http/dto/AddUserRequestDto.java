@@ -1,6 +1,7 @@
 package com.emazon.msvc_user.adapters.driving.http.dto;
 
 import com.emazon.msvc_user.domain.model.Role;
+import com.emazon.msvc_user.domain.util.ValidationMessages;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import java.util.Date;
 
 @AllArgsConstructor
 public class AddUserRequestDto {
+
     private Long documentId;
 
     private String name;
@@ -22,8 +24,8 @@ public class AddUserRequestDto {
 
     private String email;
 
-    @NotBlank(message = "Password is mandatory")
-    @Size(min = 8, message = "Password must be at least 8 characters long")
+    @NotBlank(message = ValidationMessages.PASSWORD_MANDATORY)
+    @Size(min = 8, message = ValidationMessages.MIN_PASSWORD_SIZE)
     private String password;
 
     private Role role;

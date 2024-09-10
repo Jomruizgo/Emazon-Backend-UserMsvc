@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.3'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id 'jacoco'
 }
 
 group = 'com.emazon'
@@ -41,4 +42,31 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	finalizedBy jacocoTestReport
 }
+
+jacocoTestReport {
+	dependsOn test
+
+	reports {
+		html.required = true
+	}
+
+	// Configuración para excluir la clase de modelo
+	classDirectories.setFrom(files(classDirectories.files.collect {
+		fileTree(dir: it, excludes: ['**/model/**', '**/Constants.class', '**/configuration/**','**/MsvcUserApplication.class'])
+	}))
+}
+
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.20 // Configura el umbral de cobertura (85% es el mínimo usado en Pragma)
+			}
+		}
+	}
+}
+
+// Asegúrate de que la verificación de cobertura se ejecute después de las pruebas
+check.dependsOn jacocoTestCoverageVerification

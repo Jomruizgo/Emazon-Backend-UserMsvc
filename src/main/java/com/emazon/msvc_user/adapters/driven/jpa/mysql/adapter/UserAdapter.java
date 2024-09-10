@@ -18,4 +18,14 @@ public class UserAdapter implements IUserPersistencePort {
     public void save(User user) {
         userRepository.save(userEntityMapper.toEntity(user));
     }
+
+    @Override
+    public User findUserByEmail(String email) {
+        return userEntityMapper.toModel(userRepository.findByEmail(email).orElse(null));
+    }
+
+    @Override
+    public User findUserByDocumentId(Long documentId) {
+        return userEntityMapper.toModel(userRepository.findByDocumentId(documentId).orElse(null));
+    }
 }

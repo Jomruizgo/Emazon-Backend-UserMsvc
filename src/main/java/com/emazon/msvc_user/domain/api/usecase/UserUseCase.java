@@ -22,7 +22,7 @@ public class UserUseCase implements IUserServicePort {
 
     @Override
     public void saveUser(User user) {
-        ValidateUser validateUser= new ValidateUser(rolePersistencePort);
+        ValidateUser validateUser= new ValidateUser(rolePersistencePort, userPersistencePort);
 
         if (user.getRole() == null){
             Role defaultRole = rolePersistencePort.findRoleByName(Constants.DEFAULT_USER_ROLE_NAME);

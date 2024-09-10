@@ -1,6 +1,7 @@
 package com.emazon.msvc_user.configuration.exceptionhandler;
 
 
+import com.emazon.msvc_user.domain.exceptions.DuplicatedObjectException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -14,6 +15,14 @@ import java.util.Map;
 
 @ControllerAdvice
 public class ControllerAdvisor {
+    @ExceptionHandler(DuplicatedObjectException.class)
+    public ResponseEntity<ExceptionResponse> handleDuplicateCategoryNameException(DuplicatedObjectException exception){
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ExceptionResponse(
+                String.format(exception.getMessage()),
+                HttpStatus.CONFLICT.toString(), LocalDateTime.now()
+        ));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
