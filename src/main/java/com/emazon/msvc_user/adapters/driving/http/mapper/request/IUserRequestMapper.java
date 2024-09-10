@@ -5,15 +5,11 @@ import com.emazon.msvc_user.domain.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+
 @Mapper(componentModel = "spring")
 public interface IUserRequestMapper {
-    @Mapping(source = "documentId", target = "documentId")
-    @Mapping(source = "name", target = "name")
-    @Mapping(source = "lastName", target = "lastName")
-    @Mapping(source = "mobileNumber", target = "mobileNumber")
-    @Mapping(source = "birthdate", target = "birthdate")
-    @Mapping(source = "email", target = "email")
-    @Mapping(source = "password", target = "password")
-    @Mapping(source = "active", target = "isActive")
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
     User addRequestDtotoModel(AddUserRequestDto addUserRequestDto);
 }

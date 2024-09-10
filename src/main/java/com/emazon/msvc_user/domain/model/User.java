@@ -3,20 +3,22 @@ package com.emazon.msvc_user.domain.model;
 import java.util.Date;
 
 public class User {
+    private Long id;
     private Long documentId;
     private String name;
-
     private String lastName;
     private String mobileNumber;
     private Date birthdate;
     private String email;
     private String password;
+    private Role role;
     private boolean isActive;
     private Date createdAt;
 
     public User() {}
 
-    public User(Long documentId, String name, String lastName, String mobileNumber, Date birthdate, String email, String password, boolean isActive, Date createdAt) {
+    public User(Long id, Long documentId, String name, String lastName, String mobileNumber, Date birthdate, String email, String password, Role role, boolean isActive, Date createdAt) {
+        this.id = id;
         this.documentId = documentId;
         this.name = name;
         this.lastName = lastName;
@@ -24,9 +26,14 @@ public class User {
         this.birthdate = birthdate;
         this.email = email;
         this.password = password;
+        this.role = role;
         this.isActive = isActive;
         this.createdAt = createdAt;
     }
+
+    public Long getId() { return id; }
+
+    public void setId(Long id) { this.id = id; }
 
     public Long getDocumentId() { return documentId; }
 
@@ -58,7 +65,11 @@ public class User {
 
     public void setPassword(String password) { this.password = password; }
 
-    public boolean isActive() { return isActive; }
+    public Role getRole() { return role; }
+
+    public void setRole(Role role) { this.role = role; }
+
+    public boolean getIsActive() { return isActive; }
 
     public void setIsActive(boolean active) { isActive = active; }
 

@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.print.attribute.standard.DateTimeAtCreation;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -40,8 +40,17 @@ public class UserEntity {
     private String password;
 
     @Column(name = "is_active")
-    private boolean isActive = true;
+    private boolean isActive;
 
     @Column(name = "created_at")
-    private DateTimeAtCreation createAt;
+    private LocalDateTime createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "role_id", nullable = false)
+    private RoleEntity role;
+
+
+    //These methods are generated manually because Lombok change their names and  this cause mappers issues.
+    public boolean getIsActive() { return isActive; }
+    public void setIsActive(boolean active) { isActive = active; }
 }

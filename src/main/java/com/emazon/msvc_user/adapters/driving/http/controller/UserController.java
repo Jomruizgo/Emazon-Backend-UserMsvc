@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:9091"})
+@CrossOrigin(origins = {"*"})
 @RequestMapping(value ="api/user")
 public class UserController {
     private final IUserServicePort userServicePort;
