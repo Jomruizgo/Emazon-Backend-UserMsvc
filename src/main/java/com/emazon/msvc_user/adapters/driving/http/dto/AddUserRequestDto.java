@@ -1,11 +1,9 @@
 package com.emazon.msvc_user.adapters.driving.http.dto;
 
-import com.emazon.msvc_user.domain.model.Role;
+
 import com.emazon.msvc_user.domain.util.ValidationMessages;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.Date;
 
@@ -28,7 +26,6 @@ public class AddUserRequestDto {
     @Size(min = 8, message = ValidationMessages.MIN_PASSWORD_SIZE)
     private String password;
 
-    private Role role;
 
     private boolean isActive;
 
@@ -86,14 +83,6 @@ public class AddUserRequestDto {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
     }
 
     public boolean getIsActive() {

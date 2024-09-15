@@ -1,6 +1,8 @@
 package com.emazon.msvc_user.configuration.exceptionhandler;
 
 
+import com.emazon.msvc_user.domain.exceptions.BadCredentialsException;
+import com.emazon.msvc_user.domain.exceptions.DisabledAccountException;
 import com.emazon.msvc_user.domain.exceptions.DuplicatedObjectException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,23 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ExceptionResponse(
                 String.format(exception.getMessage()),
                 HttpStatus.CONFLICT.toString(), LocalDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(DisabledAccountException.class)
+    public ResponseEntity<ExceptionResponse> handleDisabledAccountException(DisabledAccountException exception){
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ExceptionResponse(
+                String.format(exception.getMessage()),
+                HttpStatus.FORBIDDEN.toString(), LocalDateTime.now()
+        ));
+    }
+
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ExceptionResponse> handleBadCredentialsException(BadCredentialsException exception){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ExceptionResponse(
+                String.format(exception.getMessage()),
+                HttpStatus.UNAUTHORIZED.toString(), LocalDateTime.now()
         ));
     }
 

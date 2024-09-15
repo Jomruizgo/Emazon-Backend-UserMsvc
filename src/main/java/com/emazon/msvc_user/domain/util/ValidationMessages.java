@@ -1,7 +1,5 @@
 package com.emazon.msvc_user.domain.util;
 
-import jakarta.validation.constraints.Size;
-
 public class ValidationMessages {
     private ValidationMessages(){throw new IllegalStateException("Utility class");}
     public static final String NAME_MANDATORY = "Name is mandatory";

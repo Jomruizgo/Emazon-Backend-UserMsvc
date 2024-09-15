@@ -24,11 +24,9 @@ public class UserUseCase implements IUserServicePort {
     public void saveUser(User user) {
         ValidateUser validateUser= new ValidateUser(rolePersistencePort, userPersistencePort);
 
-        if (user.getRole() == null){
-            Role defaultRole = rolePersistencePort.findRoleByName(Constants.DEFAULT_USER_ROLE_NAME);
+        Role defaultRole = rolePersistencePort.findRoleByName(Constants.DEFAULT_USER_ROLE_NAME);
 
-            user.setRole(defaultRole);
-        }
+        user.setRole(defaultRole);
 
         validateUser.validateUserData(user);
 
@@ -37,5 +35,6 @@ public class UserUseCase implements IUserServicePort {
         userPersistencePort.save(user);
 
     }
+
 
 }

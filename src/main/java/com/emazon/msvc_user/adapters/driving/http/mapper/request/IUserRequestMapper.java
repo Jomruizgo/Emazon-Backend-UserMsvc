@@ -11,5 +11,6 @@ public interface IUserRequestMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "role", ignore = true)
     User addRequestDtotoModel(AddUserRequestDto addUserRequestDto);
 }

@@ -9,7 +9,6 @@ import com.emazon.msvc_user.domain.util.ValidationMessages;
 import java.util.Calendar;
 import java.util.Date;
 
-import static org.springframework.util.ClassUtils.isPresent;
 
 public class ValidateUser {
     private final IRolePersistencePort rolePersistencePort;

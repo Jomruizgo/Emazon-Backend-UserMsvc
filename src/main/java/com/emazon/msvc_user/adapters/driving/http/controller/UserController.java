@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin(origins = {"*"})
 @RequestMapping(value ="api/user")
 public class UserController {
     private final IUserServicePort userServicePort;
@@ -20,9 +19,11 @@ public class UserController {
         this.userRequestMapper = userRequestMapper;
     }
 
-    @PostMapping("")
+    @PostMapping("/warehouse")
     public ResponseEntity<Void> addUser(@Valid  @RequestBody AddUserRequestDto request){
         userServicePort.saveUser(userRequestMapper.addRequestDtotoModel(request));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+
 }
