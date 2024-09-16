@@ -1,7 +1,9 @@
 package com.emazon.msvc_user.configuration.security.jwt;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.emazon.msvc_user.adapters.driven.token.jwt.JavaJwtConfig;
+import com.emazon.msvc_user.domain.exceptions.InvalidTokenException;
+import com.emazon.msvc_user.domain.spi.ITokenServicePort;
+import com.emazon.msvc_user.domain.util.AuthMessages;
+import com.emazon.msvc_user.domain.util.JwtClaim;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,11 +22,11 @@ import java.io.IOException;
 import java.util.Collection;
 
 public class JwtValidatorFilter extends OncePerRequestFilter {
+    private final ITokenServicePort tokenPort;
 
-    private JavaJwtConfig javaJwtConfig;
 
-    public JwtValidatorFilter(JavaJwtConfig javaJwtConfig) {
-        this.javaJwtConfig = javaJwtConfig;
+    public JwtValidatorFilter(ITokenServicePort tokenPort) {
+        this.tokenPort = tokenPort;
     }
 
     @Override
@@ -37,10 +39,12 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
         if (jwtToken != null) {
             jwtToken = jwtToken.substring(7);
 
-            DecodedJWT decodedJWT = javaJwtConfig.validateToken(jwtToken);
+            if (!tokenPort.isValidToken(jwtToken)) {
+                throw  new InvalidTokenException(AuthMessages.INVALID_TOKEN_MESSAGE);
+            }
 
-            String username = javaJwtConfig.extractUsername(decodedJWT);
-            String stringAuthorities = javaJwtConfig.getSpecificClaim(decodedJWT, "authorities").asString();
+            String username = tokenPort.extractUsername(jwtToken);
+            String stringAuthorities = tokenPort.extractSpecificClaim(jwtToken, JwtClaim.AUTHORITIES.getClaimName());
 
             Collection<? extends GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(stringAuthorities);
 

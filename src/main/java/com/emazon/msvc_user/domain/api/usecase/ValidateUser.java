@@ -11,11 +11,9 @@ import java.util.Date;
 
 
 public class ValidateUser {
-    private final IRolePersistencePort rolePersistencePort;
     private final IUserPersistencePort userPersistencePort;
 
-    public ValidateUser(IRolePersistencePort rolePersistencePort, IUserPersistencePort userPersistencePort) {
-        this.rolePersistencePort = rolePersistencePort;
+    public ValidateUser(IUserPersistencePort userPersistencePort) {
         this.userPersistencePort = userPersistencePort;
     }
 
@@ -49,9 +47,6 @@ public class ValidateUser {
             throw new IllegalArgumentException(ValidationMessages.USER_NOT_ADULT);
         }
 
-        if (rolePersistencePort.findRoleByName(user.getRole().getName()) == null){
-            throw new IllegalArgumentException(ValidationMessages.ROLE_INVALID);
-        }
     }
 
     private boolean isBlank(String value) {

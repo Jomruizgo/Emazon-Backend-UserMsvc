@@ -6,7 +6,7 @@ import com.emazon.msvc_user.domain.exceptions.DisabledAccountException;
 import com.emazon.msvc_user.domain.model.AuthUser;
 import com.emazon.msvc_user.domain.model.User;
 import com.emazon.msvc_user.domain.spi.IPasswordEncoderPort;
-import com.emazon.msvc_user.domain.spi.ITokenPort;
+import com.emazon.msvc_user.domain.spi.ITokenServicePort;
 import com.emazon.msvc_user.domain.spi.IUserPersistencePort;
 import com.emazon.msvc_user.domain.util.AuthMessages;
 
@@ -14,9 +14,9 @@ import com.emazon.msvc_user.domain.util.AuthMessages;
 public class AuthUseCase implements IAuthServicePort {
     private final IUserPersistencePort userPersistencePort;
     private final IPasswordEncoderPort passwordEncoder;
-    private final ITokenPort tokenPort;
+    private final ITokenServicePort tokenPort;
 
-    public AuthUseCase(IUserPersistencePort userPersistencePort, IPasswordEncoderPort passwordEncoder, ITokenPort tokenPort) {
+    public AuthUseCase(IUserPersistencePort userPersistencePort, IPasswordEncoderPort passwordEncoder, ITokenServicePort tokenPort) {
         this.userPersistencePort = userPersistencePort;
         this.passwordEncoder = passwordEncoder;
         this.tokenPort = tokenPort;

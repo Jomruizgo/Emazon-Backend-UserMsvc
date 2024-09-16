@@ -7,16 +7,15 @@ import com.emazon.msvc_user.adapters.driven.jpa.mysql.mapper.IRoleEntityMapper;
 import com.emazon.msvc_user.adapters.driven.jpa.mysql.mapper.IUserEntityMapper;
 import com.emazon.msvc_user.adapters.driven.jpa.mysql.repository.IRoleRepository;
 import com.emazon.msvc_user.adapters.driven.jpa.mysql.repository.IUserRepository;
-import com.emazon.msvc_user.adapters.driven.token.jwt.JavaJwtConfig;
-import com.emazon.msvc_user.adapters.driven.token.jwt.TokenAdapter;
-import com.emazon.msvc_user.adapters.util.UserDetailUtil;
+import com.emazon.msvc_user.adapters.driven.token.jwt.JavaJwtAdapter;
+import com.emazon.msvc_user.adapters.driven.token.jwt.JwtUserDetails;
 import com.emazon.msvc_user.domain.api.IAuthServicePort;
 import com.emazon.msvc_user.domain.api.IUserServicePort;
 import com.emazon.msvc_user.domain.api.usecase.AuthUseCase;
 import com.emazon.msvc_user.domain.api.usecase.UserUseCase;
 import com.emazon.msvc_user.domain.spi.IPasswordEncoderPort;
 import com.emazon.msvc_user.domain.spi.IRolePersistencePort;
-import com.emazon.msvc_user.domain.spi.ITokenPort;
+import com.emazon.msvc_user.domain.spi.ITokenServicePort;
 import com.emazon.msvc_user.domain.spi.IUserPersistencePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -27,14 +26,10 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class BeanConfiguration {
     @Bean
-    public UserDetailUtil userDetailUtil() {
-        return new UserDetailUtil();
+    public JwtUserDetails userDetail() {
+        return new JwtUserDetails();
     }
 
-    @Bean
-    public JavaJwtConfig javaJwtConfig() {
-        return new JavaJwtConfig();
-    }
 
     @Bean
     public IUserPersistencePort userPersistencePort(IUserRepository userRepository, IUserEntityMapper userEntityMapper) {
@@ -52,8 +47,8 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public ITokenPort tokenPort(UserDetailUtil userDetailUtil, JavaJwtConfig javaJwtConfig) {
-        return new TokenAdapter(userDetailUtil, javaJwtConfig);
+    public ITokenServicePort tokenPort(JwtUserDetails jwtUserDetails) {
+        return new JavaJwtAdapter(jwtUserDetails);
     }
 
     @Bean
@@ -66,7 +61,7 @@ public class BeanConfiguration {
     @Bean
     public IAuthServicePort authServicePort(IUserPersistencePort userPersistencePort,
                                             IPasswordEncoderPort passwordEncoderPort,
-                                            ITokenPort tokenPort) {
+                                            ITokenServicePort tokenPort) {
         return new AuthUseCase(userPersistencePort, passwordEncoderPort, tokenPort);
     }
 }

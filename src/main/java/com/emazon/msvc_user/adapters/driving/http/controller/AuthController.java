@@ -5,6 +5,7 @@ import com.emazon.msvc_user.adapters.driving.http.dto.AuthenticationResponseDto;
 import com.emazon.msvc_user.adapters.driving.http.mapper.request.IAuthRequestMapper;
 import com.emazon.msvc_user.adapters.driving.http.mapper.response.IAuthResponseMapper;
 import com.emazon.msvc_user.domain.api.IAuthServicePort;
+import com.emazon.msvc_user.domain.util.Constants;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value ="api/auth")
+@RequestMapping(value = Constants.API_AUTH_PATH)
 public class AuthController {
     private final IAuthServicePort authServicePort;
     private final IAuthRequestMapper authRequestMapper;
@@ -25,7 +26,7 @@ public class AuthController {
         this.authResponseMapper = authResponseMapper;
     }
 
-    @PostMapping("/login")
+    @PostMapping(Constants.LOGIN_SEMI_PATH)
     public ResponseEntity<AuthenticationResponseDto> login(@RequestBody AuthenticationRequestDto authRequest){
         AuthenticationResponseDto token = authResponseMapper.modelToAuthResponse(authServicePort.login(authRequestMapper.authRequestToModel(authRequest)));
         return new ResponseEntity<>(token, HttpStatus.OK);

@@ -1,17 +1,12 @@
 package com.emazon.msvc_user.configuration.security;
 
-import com.emazon.msvc_user.adapters.driven.encoder.EncoderAdapter;
-import com.emazon.msvc_user.adapters.driven.token.jwt.JavaJwtConfig;
-import com.emazon.msvc_user.adapters.driving.http.security.authorization.UserDetailServiceImpl;
-import com.emazon.msvc_user.adapters.util.UserDetailUtil;
 import com.emazon.msvc_user.configuration.security.jwt.JwtValidatorFilter;
-import com.emazon.msvc_user.domain.spi.IUserPersistencePort;
+import com.emazon.msvc_user.domain.spi.ITokenServicePort;
+import com.emazon.msvc_user.domain.util.Constants;
+import com.emazon.msvc_user.domain.util.UserRole;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -22,21 +17,15 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
-    private final EncoderAdapter encoderAdapter= new EncoderAdapter();
-    private final IUserPersistencePort userPersistencePort;
-    private final UserDetailUtil userDetailUtil;
-    private JavaJwtConfig javaJwtConfig;
 
-    public WebSecurityConfig(IUserPersistencePort userPersistencePort, UserDetailUtil userDetailUtil, JavaJwtConfig javaJwtConfig) {
-        this.userPersistencePort = userPersistencePort;
-        this.userDetailUtil = userDetailUtil;
-        this.javaJwtConfig = javaJwtConfig;
+    private final ITokenServicePort tokenPort;
+
+
+    public WebSecurityConfig(ITokenServicePort tokenPort) {
+        this.tokenPort = tokenPort;
     }
 
-    @Bean
-    public UserDetailServiceImpl userDetailsService() {
-        return new UserDetailServiceImpl(userPersistencePort, userDetailUtil);
-    }
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -44,27 +33,15 @@ public class WebSecurityConfig {
                 csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(http -> {
-                    http.requestMatchers(HttpMethod.POST, "api/auth/**").permitAll();
-                    http.requestMatchers(HttpMethod.POST, "api/user/warehouse").hasRole("ADMINISTRATOR");
+                    http.requestMatchers(HttpMethod.POST, Constants.API_AUTH_PATH + Constants.LOGIN_SEMI_PATH).permitAll();
+                    http.requestMatchers(HttpMethod.POST, Constants.API_USER_PATH + Constants.WAREHOUSE_SEMI_PATH).hasRole(UserRole.ADMIN.getRoleName());
                     http.anyRequest().denyAll();
                 })
-                .addFilterBefore(new JwtValidatorFilter(javaJwtConfig), BasicAuthenticationFilter.class);
+                .addFilterBefore(new JwtValidatorFilter(tokenPort), BasicAuthenticationFilter.class);
 
 
         return httpSecurity.build();
     }
-
-    @Bean
-    public AuthenticationProvider authenticationStrategy(UserDetailServiceImpl userDetailsService){
-        DaoAuthenticationProvider authStrategy = new DaoAuthenticationProvider();
-
-        authStrategy.setPasswordEncoder(encoderAdapter.getPasswordEncoder());
-
-        authStrategy.setUserDetailsService(userDetailsService);
-
-        return authStrategy;
-    }
-
 
 
 }

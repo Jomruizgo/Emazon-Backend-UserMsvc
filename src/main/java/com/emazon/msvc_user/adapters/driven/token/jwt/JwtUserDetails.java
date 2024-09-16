@@ -1,17 +1,27 @@
-package com.emazon.msvc_user.adapters.util;
+package com.emazon.msvc_user.adapters.driven.token.jwt;
 
 import com.emazon.msvc_user.domain.model.User;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserDetailUtil {
-    public UserDetails loadUserDetail(User userModel){
+/**
+ * Utility class for configuring {@link UserDetails} objects.
+ * <p>
+ * This class is responsible for converting a {@link User} model into a {@link UserDetails} object,
+ * which is used by Spring Security to handle authentication and authorization.
+ * </p>
+ * <p>
+ * Any other class that requires configuring or creating {@link UserDetails} should use
+ * this class to ensure consistency in the handling of user details.
+ * </p>
+ */
+public class JwtUserDetails {
 
-        if (userModel == null) {throw new UsernameNotFoundException("Bad credentials");}
+    public UserDetails loadUserDetail(@NonNull User userModel){
 
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
 

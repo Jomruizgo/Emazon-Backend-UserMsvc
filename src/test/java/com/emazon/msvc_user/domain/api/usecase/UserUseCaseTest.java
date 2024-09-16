@@ -7,6 +7,7 @@ import com.emazon.msvc_user.domain.spi.IPasswordEncoderPort;
 import com.emazon.msvc_user.domain.spi.IRolePersistencePort;
 import com.emazon.msvc_user.domain.spi.IUserPersistencePort;
 import com.emazon.msvc_user.domain.util.TestConstants;
+import com.emazon.msvc_user.domain.util.TestUserRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,7 +32,7 @@ class UserUseCaseTest {
     private IRolePersistencePort rolePersistencePort;
 
     @Mock
-    private IPasswordEncoderPort passwordEncoderPort;
+    private IPasswordEncoderPort passwordEncoder;
 
     @InjectMocks
     private UserUseCase userUseCase;
@@ -40,73 +41,37 @@ class UserUseCaseTest {
     private Role defaultRole;
 
     @BeforeEach
-    public void setup() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         user = new User();
-        user.setDocumentId(123456L);
         user.setName("John");
         user.setLastName("Doe");
-        user.setMobileNumber("+573005698325");
+        user.setDocumentId(123456789L);
+        user.setMobileNumber("+1234567890");
         user.setEmail("john.doe@example.com");
-        user.setBirthdate(getBirthdate(20)); // 20 years old
-        user.setPassword("password123");
+        user.setBirthdate(new Date(2000-01-01)); // 18+ años
+        user.setPassword("plainPassword");
 
         defaultRole = new Role();
-        defaultRole.setName("aux_bodega");
+        defaultRole.setName(TestUserRole.WAREHOUSE.toString());
     }
 
     @Test
-    void testSaveUser_WithNullRole_AssignsDefaultRoleAndSavesUser() {
+    void saveUser_SuccessfulSave_ShouldAssignRoleAndEncodePassword() {
         // Arrange
-        when(rolePersistencePort.findRoleByName(TestConstants.DEFAULT_USER_ROLE_NAME)).thenReturn(defaultRole);
-        when(passwordEncoderPort.encode("password123")).thenReturn("encodedPassword123");
+        when(rolePersistencePort.findRoleByName(TestUserRole.WAREHOUSE.toString())).thenReturn(defaultRole);
+        when(passwordEncoder.encode("plainPassword")).thenReturn("encodedPassword");
+        when(userPersistencePort.findUserByEmail(user.getEmail())).thenReturn(null);
+        when(userPersistencePort.findUserByDocumentId(user.getDocumentId())).thenReturn(null);
 
         // Act
         userUseCase.saveUser(user);
 
         // Assert
-        assertEquals("aux_bodega", user.getRole().getName());
-        assertEquals("encodedPassword123", user.getPassword());
-        verify(userPersistencePort).save(user); // Verifica que el método save se llame
+        assertEquals(defaultRole, user.getRole());
+        assertEquals("encodedPassword", user.getPassword());
+        verify(userPersistencePort, times(1)).save(user);
     }
-
-    @Test
-    void testSaveUser_WithRole_DoesNotAssignDefaultRoleAndSavesUser() {
-        // Arrange
-        Role role = new Role();
-        role.setName("admin");
-        user.setRole(role);
-
-        when(rolePersistencePort.findRoleByName("admin")).thenReturn(role);
-        when(passwordEncoderPort.encode("password123")).thenReturn("encodedPassword123");
-
-        // Act
-        userUseCase.saveUser(user);
-
-        // Assert
-        assertEquals("admin", user.getRole().getName());
-        verify(userPersistencePort).save(user);
-    }
-
-    @Test
-    void testSaveUser_WithUnexpectedRole_ThrowsException() {
-        // Arrange
-        Role role = new Role();
-        role.setName("unexpected_role");
-        user.setRole(role);
-
-        when(rolePersistencePort.findRoleByName("unexpected_role")).thenReturn(null);
-        when(passwordEncoderPort.encode("password123")).thenReturn("encodedPassword123");
-
-        // Act
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            userUseCase.saveUser(user);
-        });
-
-        // Assert
-        assertEquals("Role must be valid.", exception.getMessage());
-    }
-
 
     @Test
     void testSaveUser_InvalidDocumentId_ThrowsException() {

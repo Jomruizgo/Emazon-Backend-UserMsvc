@@ -4,6 +4,7 @@ package com.emazon.msvc_user.configuration.exceptionhandler;
 import com.emazon.msvc_user.domain.exceptions.BadCredentialsException;
 import com.emazon.msvc_user.domain.exceptions.DisabledAccountException;
 import com.emazon.msvc_user.domain.exceptions.DuplicatedObjectException;
+import com.emazon.msvc_user.domain.exceptions.InvalidTokenException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -22,6 +23,15 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ExceptionResponse(
                 String.format(exception.getMessage()),
                 HttpStatus.CONFLICT.toString(), LocalDateTime.now()
+        ));
+    }
+
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ExceptionResponse> handleInvalidTokenException(InvalidTokenException exception){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ExceptionResponse(
+                String.format(exception.getMessage()),
+                HttpStatus.UNAUTHORIZED.toString(), LocalDateTime.now()
         ));
     }
 

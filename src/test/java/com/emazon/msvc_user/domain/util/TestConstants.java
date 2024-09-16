@@ -6,5 +6,4 @@ public class TestConstants {
 
     public static final int MAX_MOBILE_NUMBER_LENGTH = 13;
 
-    public static final String DEFAULT_USER_ROLE_NAME = "aux_bodega";
 }

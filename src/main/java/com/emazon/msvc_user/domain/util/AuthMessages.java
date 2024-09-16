@@ -9,4 +9,6 @@ public class AuthMessages {
     public static final String BAD_CREDENTIALS_MESSAGE = "Bad credentials";
 
     public static final String NOT_ACTIVE_MESSAGE = "Disabled account. Please, contact your administrator";
+
+    public static final String INVALID_TOKEN_MESSAGE = "Token invalid, not Authorized";
 }

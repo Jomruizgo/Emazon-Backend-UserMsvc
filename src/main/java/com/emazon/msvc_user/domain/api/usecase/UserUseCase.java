@@ -6,7 +6,7 @@ import com.emazon.msvc_user.domain.model.User;
 import com.emazon.msvc_user.domain.spi.IPasswordEncoderPort;
 import com.emazon.msvc_user.domain.spi.IRolePersistencePort;
 import com.emazon.msvc_user.domain.spi.IUserPersistencePort;
-import com.emazon.msvc_user.domain.util.Constants;
+import com.emazon.msvc_user.domain.util.UserRole;
 
 
 public class UserUseCase implements IUserServicePort {
@@ -22,9 +22,9 @@ public class UserUseCase implements IUserServicePort {
 
     @Override
     public void saveUser(User user) {
-        ValidateUser validateUser= new ValidateUser(rolePersistencePort, userPersistencePort);
+        ValidateUser validateUser= new ValidateUser(userPersistencePort);
 
-        Role defaultRole = rolePersistencePort.findRoleByName(Constants.DEFAULT_USER_ROLE_NAME);
+        Role defaultRole = rolePersistencePort.findRoleByName(UserRole.WAREHOUSE.toString());
 
         user.setRole(defaultRole);
 
@@ -35,6 +35,5 @@ public class UserUseCase implements IUserServicePort {
         userPersistencePort.save(user);
 
     }
-
 
 }
