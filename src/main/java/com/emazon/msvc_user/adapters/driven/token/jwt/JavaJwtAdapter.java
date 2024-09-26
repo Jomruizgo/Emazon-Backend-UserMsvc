@@ -9,6 +9,7 @@ import com.emazon.msvc_user.domain.model.User;
 import com.emazon.msvc_user.domain.spi.ITokenServicePort;
 import com.emazon.msvc_user.domain.util.AuthMessages;
 import com.emazon.msvc_user.domain.util.JwtClaim;
+import com.sun.jdi.LongValue;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,6 +31,10 @@ public class JavaJwtAdapter implements ITokenServicePort {
 
     @Value("${security.jwt.user.generator}")
     private String userGenerator;
+
+    @Value("${security.jwt.expiration-in-hours}")
+    private Long timeToExpiratioOnHours;
+
 
     public JavaJwtAdapter(JwtUserDetails jwtUserDetails) {
         this.jwtUserDetails = jwtUserDetails;
@@ -106,7 +111,7 @@ public class JavaJwtAdapter implements ITokenServicePort {
                 .withClaim(JwtClaim.USER_ID.getClaimName(), userId)
                 .withClaim(JwtClaim.AUTHORITIES.getClaimName(), authorities)
                 .withIssuedAt(new Date())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 1800000))
+                .withExpiresAt(new Date(System.currentTimeMillis() + timeToExpiratioOnHours*3600*1000))
                 .withJWTId(UUID.randomUUID().toString())
                 .sign(algorithm);
     }

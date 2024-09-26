@@ -24,7 +24,7 @@ public class UserUseCase implements IUserServicePort {
     public void saveUser(User user) {
         ValidateUser validateUser= new ValidateUser(userPersistencePort);
 
-        Role defaultRole = rolePersistencePort.findRoleByName(UserRole.WAREHOUSE.toString());
+        Role defaultRole = rolePersistencePort.findRoleByName(UserRole.WAREHOUSE.getRoleName());
 
         user.setRole(defaultRole);
 
