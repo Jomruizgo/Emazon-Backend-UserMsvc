@@ -21,8 +21,14 @@ public class UserController {
     }
 
     @PostMapping(Constants.WAREHOUSE_SEMI_PATH)
-    public ResponseEntity<Void> addUser(@Valid  @RequestBody AddUserRequestDto request){
-        userServicePort.saveUser(userRequestMapper.addRequestDtotoModel(request));
+    public ResponseEntity<Void> addWarehouseAssistant(@Valid  @RequestBody AddUserRequestDto request){
+        userServicePort.saveWarehouseAssistant(userRequestMapper.addRequestDtotoModel(request));
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping(Constants.CLIENT_SEMI_PATH)
+    public ResponseEntity<Void> addClient(@Valid  @RequestBody AddUserRequestDto request){
+        userServicePort.saveClient(userRequestMapper.addRequestDtotoModel(request));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

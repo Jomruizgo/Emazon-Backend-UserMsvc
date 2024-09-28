@@ -11,10 +11,14 @@ public class Constants {
 
     public static final String API_USER_PATH = "api/user";
     public static final String WAREHOUSE_SEMI_PATH = "/warehouse";
+    public static final String CLIENT_SEMI_PATH = "/client";
 
     //User Details Constants
     public static final boolean DEFAULT_ACCOUNT_NON_EXPIRED = true;
     public static final boolean DEFAULT_CREDENTIAL_IS_NON_EXPIRED = true;
     public static final boolean DEFAULT_ACCOUNT_NON_LOCKED = true;
+
+
+    public static final String ROLE_NOT_FOUND_MESSAGE = "Role not found";
 
 }

@@ -35,6 +35,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(http -> {
                     http.requestMatchers(HttpMethod.POST, Constants.API_AUTH_PATH + Constants.LOGIN_SEMI_PATH).permitAll();
                     http.requestMatchers(HttpMethod.POST, Constants.API_USER_PATH + Constants.WAREHOUSE_SEMI_PATH).hasRole(UserRole.ADMIN.getRoleName());
+                    http.requestMatchers(HttpMethod.POST, Constants.API_USER_PATH + Constants.CLIENT_SEMI_PATH).hasRole(UserRole.ADMIN.getRoleName());
                     http.anyRequest().denyAll();
                 })
                 .addFilterBefore(new JwtValidatorFilter(tokenPort), BasicAuthenticationFilter.class);

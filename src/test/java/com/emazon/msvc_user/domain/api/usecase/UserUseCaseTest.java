@@ -1,6 +1,7 @@
 package com.emazon.msvc_user.domain.api.usecase;
 
 import com.emazon.msvc_user.domain.exceptions.DuplicatedObjectException;
+import com.emazon.msvc_user.domain.exceptions.ObjectNotFoundException;
 import com.emazon.msvc_user.domain.model.Role;
 import com.emazon.msvc_user.domain.model.User;
 import com.emazon.msvc_user.domain.spi.IPasswordEncoderPort;
@@ -8,6 +9,8 @@ import com.emazon.msvc_user.domain.spi.IRolePersistencePort;
 import com.emazon.msvc_user.domain.spi.IUserPersistencePort;
 import com.emazon.msvc_user.domain.util.TestConstants;
 import com.emazon.msvc_user.domain.util.TestUserRole;
+import com.emazon.msvc_user.domain.util.UserRole;
+import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import javax.management.relation.RoleNotFoundException;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -56,16 +60,17 @@ class UserUseCaseTest {
         defaultRole.setName(TestUserRole.WAREHOUSE.toString());
     }
 
+
+
     @Test
     void saveUser_SuccessfulSave_ShouldAssignRoleAndEncodePassword() {
         // Arrange
-        when(rolePersistencePort.findRoleByName(TestUserRole.WAREHOUSE.toString())).thenReturn(defaultRole);
-        when(passwordEncoder.encode("plainPassword")).thenReturn("encodedPassword");
-        when(userPersistencePort.findUserByEmail(user.getEmail())).thenReturn(null);
-        when(userPersistencePort.findUserByDocumentId(user.getDocumentId())).thenReturn(null);
+        String role = TestUserRole.WAREHOUSE.getRoleName();
+        when(rolePersistencePort.findRoleByName(role)).thenReturn(defaultRole);
+        when(passwordEncoder.encode(user.getPassword())).thenReturn("encodedPassword");
 
         // Act
-        userUseCase.saveUser(user);
+        userUseCase.saveWarehouseAssistant(user);
 
         // Assert
         assertEquals(defaultRole, user.getRole());
@@ -74,28 +79,84 @@ class UserUseCaseTest {
     }
 
     @Test
-    void testSaveUser_InvalidDocumentId_ThrowsException() {
+    void saveClient_SuccessfulSave_ShouldAssignRoleAndEncodePassword() {
         // Arrange
-        user.setDocumentId(null); // Set documentId directly as a String
+        String role = TestUserRole.CLIENT.getRoleName();
+        defaultRole.setName(role);
+        when(rolePersistencePort.findRoleByName(role)).thenReturn(defaultRole);
+        when(passwordEncoder.encode(user.getPassword())).thenReturn("encodedPassword");
+
+        // Act
+        userUseCase.saveClient(user);
+
+        // Assert
+        assertEquals(defaultRole, user.getRole());
+        assertEquals("encodedPassword", user.getPassword());
+        verify(userPersistencePort, times(1)).save(user);
+    }
+
+
+    @Test
+    void saveUser_EncodePasswordFails_ShouldThrowException() {
+        // Arrange
+        String role = TestUserRole.CLIENT.getRoleName();
+        defaultRole.setName(role);
+        when(rolePersistencePort.findRoleByName(role)).thenReturn(defaultRole);
+
+        // Simula que la codificación de la contraseña falle
+        when(passwordEncoder.encode(user.getPassword())).thenThrow(new RuntimeException("Password encoding failed"));
 
         // Act & Assert
+        assertThrows(RuntimeException.class, () -> {
+            userUseCase.saveWarehouseAssistant(user);
+        });
+
+        verify(userPersistencePort, times(0)).save(any(User.class));  // Asegúrate de que no se guarda el usuario
+    }
+
+
+
+    @Test
+    void saveUser_RoleNotFound_ShouldThrowObjectNotFoundException() {
+        // Arrange
+        String role = TestUserRole.WAREHOUSE.getRoleName();
+        when(rolePersistencePort.findRoleByName(role)).thenReturn(null);
+
+        // Act & Assert
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class, () -> {
+            userUseCase.saveWarehouseAssistant(user);
+        });
+
+        assertEquals(TestConstants.ROLE_NOT_FOUND_MESSAGE, exception.getMessage());
+        verify(userPersistencePort, times(0)).save(any(User.class));  // Asegurarse de que no se guarda el usuario
+    }
+
+    @Test
+    void testSaveWarehouseAssistant_InvalidDocumentId_ThrowsException() {
+        // Arrange
+        user.setDocumentId(null); // Set documentId directly as a String
+        String role = TestUserRole.WAREHOUSE.getRoleName();
+
+        // Act & Assert
+        when(rolePersistencePort.findRoleByName(role)).thenReturn(defaultRole);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            userUseCase.saveUser(user);
+            userUseCase.saveWarehouseAssistant(user);
         });
 
         assertEquals("Document is mandatory", exception.getMessage());
     }
 
     @Test
-    void testSaveUserWhenDocumentIdExists() {
+    void testSaveWarehouseAssistantWhenDocumentIdExists() {
         User userSaved = new User();
         userSaved.setDocumentId(123456L);
+        String role = TestUserRole.WAREHOUSE.getRoleName();
 
-
+        when(rolePersistencePort.findRoleByName(role)).thenReturn(defaultRole);
         when(userPersistencePort.findUserByDocumentId(user.getDocumentId())).thenReturn(userSaved);
 
         DuplicatedObjectException exception = assertThrows(DuplicatedObjectException.class, () -> {
-            userUseCase.saveUser(user);
+            userUseCase.saveWarehouseAssistant(user);
         });
 
         assertEquals("A user with this document id already exists.", exception.getMessage());
@@ -104,13 +165,15 @@ class UserUseCaseTest {
     }
 
     @Test
-    void testSaveUser_BlankName_ThrowsException() {
+    void testSaveWarehouseAssistant_BlankName_ThrowsException() {
         // Arrange
         user.setName("");
+        String role = TestUserRole.WAREHOUSE.getRoleName();
 
         // Act & Assert
+        when(rolePersistencePort.findRoleByName(role)).thenReturn(defaultRole);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            userUseCase.saveUser(user);
+            userUseCase.saveWarehouseAssistant(user);
         });
 
         assertEquals("Name is mandatory", exception.getMessage());
@@ -119,20 +182,22 @@ class UserUseCaseTest {
         user.setName(null);
 
         exception = assertThrows(IllegalArgumentException.class, () -> {
-            userUseCase.saveUser(user);
+            userUseCase.saveWarehouseAssistant(user);
         });
 
         assertEquals("Name is mandatory", exception.getMessage());
     }
 
     @Test
-    void testSaveUser_BlankLastName_ThrowsException() {
+    void testSaveWarehouseAssistant_BlankLastName_ThrowsException() {
         // Arrange
         user.setLastName("");
+        String role = TestUserRole.WAREHOUSE.getRoleName();
 
         // Act & Assert
+        when(rolePersistencePort.findRoleByName(role)).thenReturn(defaultRole);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            userUseCase.saveUser(user);
+            userUseCase.saveWarehouseAssistant(user);
         });
 
         assertEquals("Last name is mandatory", exception.getMessage());
@@ -141,20 +206,22 @@ class UserUseCaseTest {
         user.setLastName(null);
 
         exception = assertThrows(IllegalArgumentException.class, () -> {
-            userUseCase.saveUser(user);
+            userUseCase.saveWarehouseAssistant(user);
         });
 
         assertEquals("Last name is mandatory", exception.getMessage());
     }
 
     @Test
-    void testSaveUser_InvalidEmail_ThrowsException() {
+    void testSaveWarehouseAssistant_InvalidEmail_ThrowsException() {
         // Arrange
         user.setEmail("invalid-email");
+        String role = TestUserRole.WAREHOUSE.getRoleName();
 
         // Act & Assert
+        when(rolePersistencePort.findRoleByName(role)).thenReturn(defaultRole);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            userUseCase.saveUser(user);
+            userUseCase.saveWarehouseAssistant(user);
         });
 
         assertEquals("Email should be valid", exception.getMessage());
@@ -163,22 +230,29 @@ class UserUseCaseTest {
         user.setEmail(null);
 
         exception = assertThrows(IllegalArgumentException.class, () -> {
-            userUseCase.saveUser(user);
+            userUseCase.saveWarehouseAssistant(user);
         });
 
         assertEquals("Email should be valid", exception.getMessage());
     }
 
     @Test
-    void testSaveUserWhenEmailExists() {
+    void testSaveWarehouseAssistantWhenEmailExists() {
         User userSaved = new User();
         userSaved.setDocumentId(123L);
         userSaved.setEmail("john.doe@example.com");
+        defaultRole = new Role();
+        defaultRole.setId(123L);
+        defaultRole.setName(TestUserRole.WAREHOUSE.getRoleName());
+        userSaved.setRole(defaultRole);
 
+        String role = TestUserRole.WAREHOUSE.getRoleName();
+
+        when(rolePersistencePort.findRoleByName(role)).thenReturn(defaultRole);
         when(userPersistencePort.findUserByEmail(user.getEmail())).thenReturn(userSaved);
 
         DuplicatedObjectException exception = assertThrows(DuplicatedObjectException.class, () -> {
-            userUseCase.saveUser(user);
+            userUseCase.saveWarehouseAssistant(user);
         });
 
         assertEquals("A user with this email already exists.", exception.getMessage());
@@ -187,13 +261,16 @@ class UserUseCaseTest {
     }
 
     @Test
-    void testSaveUser_UnderageUser_ThrowsException() {
+    void testSaveWarehouseAssistant_UnderageUser_ThrowsException() {
         // Arrange
         user.setBirthdate(getBirthdate(17)); // 17 years old
+        String role = TestUserRole.WAREHOUSE.getRoleName();
 
         // Act & Assert
+        when(rolePersistencePort.findRoleByName(role)).thenReturn(defaultRole);
+
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            userUseCase.saveUser(user);
+            userUseCase.saveWarehouseAssistant(user);
         });
 
         assertEquals("User must be an adult (18+ years)", exception.getMessage());
@@ -202,7 +279,7 @@ class UserUseCaseTest {
         user.setBirthdate(null);
 
         exception = assertThrows(IllegalArgumentException.class, () -> {
-            userUseCase.saveUser(user);
+            userUseCase.saveWarehouseAssistant(user);
         });
         assertEquals("User must be an adult (18+ years)", exception.getMessage());
 
@@ -211,13 +288,15 @@ class UserUseCaseTest {
     @ParameterizedTest
     @ValueSource(strings = {"12345678901234", "123ABC7890", "12 34", "+12345678901234"}) // Casos de números inválidos
     @NullAndEmptySource // Casos para nulo y vacío
-    void testSaveUser_InvalidMobileNumber_ThrowsException(String mobileNumber) {
+    void testSaveWarehouseAssistant_InvalidMobileNumber_ThrowsException(String mobileNumber) {
         // Arrange
         user.setMobileNumber(mobileNumber);
+        String role = TestUserRole.WAREHOUSE.getRoleName();
 
         // Act & Assert
+        when(rolePersistencePort.findRoleByName(role)).thenReturn(defaultRole);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            userUseCase.saveUser(user);
+            userUseCase.saveWarehouseAssistant(user);
         });
 
         assertEquals("Mobile number must be up to 13 characters: 12 digits and additionally can start with '+'", exception.getMessage());

@@ -5,5 +5,6 @@ public class TestConstants {
 
 
     public static final int MAX_MOBILE_NUMBER_LENGTH = 13;
+    public static final String ROLE_NOT_FOUND_MESSAGE = "Role not found";
 
 }
